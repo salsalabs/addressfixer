@@ -1,0 +1,3 @@
+# m	h	dom	mon	dow	command
+# https://serverfault.com/questions/633264/cronjob-run-every-two-weeks-on-saturday-starting-on-this-saturday
+00	09	*	*	Mon	test $((10#$(date +\%W)\%2)) -eq 1 && home/ubuntu/bin/run.bash
