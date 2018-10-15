@@ -12,6 +12,8 @@ func (e *Env) read(crit string, id int) {
 	for offset := range e.Read {
 		var a []Supporter
 		count := 500
+		includes := "City,State,Zip,Country"
+		crit := crit + "&include=" + includes
 		err := e.Table.Many(offset, count, crit, &a)
 		// Errors are not fatal because deadline.
 		if err != nil {

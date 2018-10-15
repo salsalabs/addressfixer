@@ -1,6 +1,7 @@
 package addressfixer
 
 import (
+	"fmt"
 	"log"
 	"strings"
 	"sync"
@@ -24,6 +25,10 @@ func (e *Env) save(id int) {
 			"Country=" + s.Country}
 		x := strings.Join(p, "&")
 		x = strings.Replace(x, " ", "%20", -1)
+		fmt.Printf("Save: %v\n", x)
+
+		e.Table.API.Verbose = true
+
 		_, err := e.Table.Save(x, s.Key)
 		if err != nil {
 			panic(err)
