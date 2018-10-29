@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
+	"strings"
 	"sync"
 
 	"github.com/salsalabs/addressfixer"
@@ -16,7 +18,6 @@ const numSavers = 2
 const numAfters = 1
 const numLoggers = 1
 const numReaders = 5
-const defCrit = `Email IS NOT EMPTY&condition=Receive_Email>0&condition=State IS EMPTY&condition=Zip IS NOT EMPTY`
 
 //const dbType = "sqlite3"
 //const dbArg = "db/addressfixer.sqlite3"
@@ -33,7 +34,6 @@ func main() {
 		app     = kingpin.New("addressfixer", "Corrects cities, postal codes and countries in a Salsa database.")
 		login   = app.Flag("login", "YAML file with Salsa campaign manager credentials").Required().String()
 		dbLogin = app.Flag("dblogin", "YAML file with database login credentials").Required().String()
-		crit    = app.Flag("criteria", "return supporters that match").Default(defCrit).String()
 	)
 	app.Parse(os.Args[1:])
 	api, err := (godig.YAMLAuth(*login))
@@ -67,12 +67,30 @@ func main() {
 	}
 
 	var w sync.WaitGroup
+	crit := []string{
+		`Email IS NOT EMPTY`,
+		`Receive_Email>0`,
+		`State IS EMPTY`,
+		`Zip IS NOT EMPTY`,
+	}
+
+	// Only fixing up supporters that have changed since
+	// the last run...
+	at, err := d.LastPost()
+	if err != nil {
+		panic(err)
+	}
+	m := fmt.Sprintf("Last_Modified>%s", at)
+	crit = append(crit, m)
+	c := strings.Join(crit, "&condition=")
+	fmt.Printf("Criteria: %v\n", c)
+
 	e.Loggers(&w, numLoggers)
 	e.Afterers(&w, numAfters)
 	e.Beforers(&w, numBeforers)
 	e.Savers(&w, numSavers)
 	e.Fixers(&w, numFixers)
-	e.Readers(&w, *crit, numReaders)
-	e.Push(&w, *crit)
+	e.Readers(&w, c, numReaders)
+	e.Push(&w, c)
 	w.Wait()
 }
