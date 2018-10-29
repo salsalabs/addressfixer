@@ -1,7 +1,6 @@
 package addressfixer
 
 import (
-	"fmt"
 	"log"
 	"strings"
 	"sync"
@@ -17,23 +16,19 @@ func (e *Env) save(id int) {
 	//log.Printf("Save_%02d: start", id)
 	for s := range e.Save {
 		p := []string{
-			"object=supporter",
-			"key=" + s.Key,
 			"City=" + s.City,
 			"State=" + s.State,
 			"Zip=" + s.Zip,
 			"Country=" + s.Country}
 		x := strings.Join(p, "&")
 		x = strings.Replace(x, " ", "%20", -1)
-		fmt.Printf("Save: %v\n", x)
-
-		e.Table.API.Verbose = true
-
-		_, err := e.Table.Save(x, s.Key)
+		_, err := e.Table.Save(s.Key, x)
 		if err != nil {
-			panic(err)
+			log.Printf("Save_%02d: %v on key %v, content %v\n", id, err, s.Key, x)
+		} else {
+			log.Printf("Save_%02d: Key=%v,%v\n", id, s.Key, strings.Join(p, ","))
+			e.After <- s
 		}
-		e.After <- s
 	}
 	log.Printf("Save_%02d: end", id)
 }
