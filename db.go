@@ -14,10 +14,11 @@ import (
 
 //DBS is the struct that hold the app database stuff.
 type DBS struct {
-	D        *sql.DB
-	LogStmt  *sql.Stmt
-	PostStmt *sql.Stmt
-	PreStmt  *sql.Stmt
+	D            *sql.DB
+	LogStmt      *sql.Stmt
+	PostStmt     *sql.Stmt
+	PreStmt      *sql.Stmt
+	LastPostStmt *sql.Stmt
 }
 
 //NewDBS returns a app database object.  The parameter is the name of a YAML
@@ -69,6 +70,12 @@ func NewDBS(cpath string) (*DBS, error) {
 	}
 	db.PostStmt = s
 
+	s, err = db.D.Prepare("select at from postimage order by at desc limit 1;")
+	if err != nil {
+		return &db, err
+	}
+	db.LastPostStmt = s
+
 	return &db, err
 }
 
@@ -104,4 +111,11 @@ func (db *DBS) LogErr(s LoggableErr) {
 		M: fmt.Sprintf("%v", s.E),
 	}
 	db.Log(x)
+}
+
+//LastPost returns the date of the most recent postimage record.
+func (db *DBS) LastPost() (at string, err error) {
+	row := db.LastPostStmt.QueryRow()
+	err = row.Scan(&at)
+	return at, err
 }
