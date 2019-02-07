@@ -1,3 +1,5 @@
+USE addressfixer;
+
 CREATE TABLE log(at timestamp default current_timestamp,
     id      varchar(32),
     city    varchar(32),
