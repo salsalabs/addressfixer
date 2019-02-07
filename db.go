@@ -3,9 +3,11 @@ package addressfixer
 import (
 	"database/sql"
 	"fmt"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
+
+	yaml "gopkg.in/yaml.v2"
+
 	//Need this to drive the SQLite3 database.
 	_ "github.com/mattn/go-sqlite3"
 	//Need this to drive the MySQL database.
@@ -33,16 +35,16 @@ func NewDBS(cpath string) (*DBS, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	fmt.Printf("DB credentials are %+v\n", c)
 	dbArg := ""
 	switch c.Type {
-	case "sqlite":
+	case "sqlite3":
 		dbArg = c.Filename
 	case "mysql":
 		t := "%v:%v@/%v?charset=utf8"
 		dbArg = fmt.Sprintf(t, c.User, c.Password, c.Database)
 	default:
-		err := fmt.Errorf("'%v' not a valid database type, '%v'", c.Type)
+		err := fmt.Errorf("'%v' not a valid database type", c.Type)
 		return nil, err
 	}
 	db := DBS{}
