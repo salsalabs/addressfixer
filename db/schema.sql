@@ -1,5 +1,3 @@
-USE addressfixer;
-
 CREATE TABLE log(at timestamp default current_timestamp,
     id      varchar(32),
     city    varchar(32),
@@ -30,3 +28,4 @@ CREATE UNIQUE INDEX preimage_id
 
 CREATE UNIQUE INDEX postimage_id
     ON postimage(id); 
+
