@@ -31,15 +31,17 @@ func Fatal(err error) {
 
 func main() {
 	var (
-		app     = kingpin.New("addressfixer", "Corrects cities, postal codes and countries in a Salsa database.")
-		login   = app.Flag("login", "YAML file with Salsa campaign manager credentials").Required().String()
-		dbLogin = app.Flag("dblogin", "YAML file with database login credentials").Required().String()
+		app        = kingpin.New("addressfixer", "Corrects cities, postal codes and countries in a Salsa database.")
+		login      = app.Flag("login", "YAML file with Salsa campaign manager credentials").Required().String()
+		dbLogin    = app.Flag("dblogin", "YAML file with database login credentials").Required().String()
+		apiVerbose = app.Flag("apiVerbose", "each api call and response is displayed if true").Default("false").Bool()
 	)
 	app.Parse(os.Args[1:])
 	api, err := (godig.YAMLAuth(*login))
 	if err != nil {
 		log.Fatalf("Main: authentication error %v\n", err)
 	}
+	api.Verbose = *apiVerbose
 
 	table := api.NewTable("supporter")
 	read := make(chan int32)
