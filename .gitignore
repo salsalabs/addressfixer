@@ -21,3 +21,6 @@ credentials
 nohup.out
 tmp
 
+# SQLite databases
+*.sqlite
+db/*.sqlite
